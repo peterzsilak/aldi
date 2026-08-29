@@ -39,6 +39,7 @@ Each test case contains the following fields:
 - **Test Case ID:** TC-001
 - **Title:** Add a single product to the cart from the search results page
 - **Description / Objective:** Verify that a product can be added to the cart from the search results page, and that the header cart counter, the card's quantity stepper, and the cart contents reflect the change correctly.
+- **Note:** The live ALDI site does not expose a "Shopping List" feature; the equivalent user flow on the production site is to add a product to the cart and validate the cart counter. This test therefore covers the real storefront behavior instead of the assignment wording.
 - **Test Type:** Functional, Smoke
 - **Test Category:** UI, Integration
 - **Priority:** High
@@ -73,6 +74,7 @@ Each test case contains the following fields:
 - **Test Case ID:** TC-002
 - **Title:** Guest user can add a product to the cart without being prompted to authenticate
 - **Description / Objective:** Verify the unauthenticated path: a guest can add a product to the cart without being blocked by a login prompt, and the guest cart persists across a page reload while the session remains unauthenticated.
+- **Note:** The live ALDI storefront does not implement a dedicated "Shopping List" flow. The equivalent guest-cart behavior is tested here using the actual "Add" button and cart counter exposed by the site.
 - **Test Type:** Functional, Regression
 - **Test Category:** UI, Security (Authentication)
 - **Priority:** High
@@ -109,6 +111,7 @@ Each test case contains the following fields:
 - **Test Case ID:** TC-003
 - **Title:** Add multiple products and verify quantity aggregation and totals in the cart
 - **Description / Objective:** Verify that adding two distinct products and raising the quantity of one of them produces correct distinct cart entries, per-line quantities and prices, an accurate cart total, and a header counter that correctly reflects **distinct line items**.
+- **Note:** Although the assignment refers to a shopping list, the live site uses a cart model instead. This test validates the production equivalent behavior: product additions, quantity updates, and cart aggregation in the real storefront.
 - **Test Type:** Functional, Regression
 - **Test Category:** UI, Integration
 - **Priority:** Medium
