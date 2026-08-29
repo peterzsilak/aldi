@@ -1,4 +1,4 @@
-import type { TestUser } from "@page-objects/types";
+import type { TestUser } from "@test-types/testuser";
 import type { Locator, Page } from "@playwright/test";
 
 export class RegisterPage {

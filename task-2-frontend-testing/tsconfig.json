@@ -20,13 +20,15 @@
         "noEmit": true,
         "paths": {
             "@page-objects/*": ["./page-objects/*"],
-            "@fixture/*": ["./fixture/*"]
+            "@fixture/*": ["./fixture/*"],
+            "@test-types/*": ["./types/*"]
         }
     },
     "include": [
         "playwright.config.ts",
         "tests/**/*.ts",
         "page-objects/**/*.ts",
-        "fixture/**/*.ts"
+        "fixture/**/*.ts",
+        "types/**/*.ts"
     ]
 }
