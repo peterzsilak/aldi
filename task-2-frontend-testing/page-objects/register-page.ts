@@ -1,5 +1,5 @@
-import type { TestUser } from "@test-types/testuser";
 import type { Locator, Page } from "@playwright/test";
+import type { TestUser } from "@test-types/testuser";
 
 export class RegisterPage {
     readonly heading: Locator;

@@ -4,12 +4,7 @@ import globals from "globals";
 
 export default [
     {
-        ignores: [
-            "node_modules/**",
-            "playwright-report/**",
-            "test-results/**",
-            ".github/**/*.ts",
-        ],
+        ignores: ["node_modules/**", "playwright-report/**", "test-results/**", ".github/**/*.ts"],
     },
     js.configs.recommended,
     {
@@ -21,10 +16,7 @@ export default [
         },
         rules: {
             "no-undef": "off",
-            "no-unused-vars": [
-                "error",
-                { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
-            ],
+            "no-unused-vars": ["error", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
         },
     },
     {

@@ -1,9 +1,9 @@
-import type { TestUser } from "@test-types/testuser";
 import { createTestUser } from "@fixture/test-user";
 import { HomePage } from "@page-objects/home-page";
 import { LoginPage } from "@page-objects/login-page";
 import { RegisterPage } from "@page-objects/register-page";
 import { test as base, expect } from "@playwright/test";
+import type { TestUser } from "@test-types/testuser";
 
 export interface PageFixtures {
     loginPage: LoginPage;
@@ -33,9 +33,7 @@ export const test = base.extend<PageFixtures>({
 
         await registerPage.navigate();
         await registerPage.register(user);
-        await expect(loginPage.successMessage).toHaveText(
-            "Registration successful",
-        );
+        await expect(loginPage.successMessage).toHaveText("Registration successful");
 
         await use(user);
 
@@ -43,16 +41,10 @@ export const test = base.extend<PageFixtures>({
     },
 });
 
-async function deleteUser(
-    user: TestUser,
-    loginPage: LoginPage,
-    homePage: HomePage,
-): Promise<void> {
+async function deleteUser(user: TestUser, loginPage: LoginPage, homePage: HomePage): Promise<void> {
     await loginPage.navigate();
     await loginPage.login(user.username, user.password);
-    await expect(
-        homePage.loggedInText.or(loginPage.errorMessage),
-    ).toBeVisible();
+    await expect(homePage.loggedInText.or(loginPage.errorMessage)).toBeVisible();
 
     if (await homePage.isDisplayed()) {
         await homePage.deleteUser(user.username);

@@ -34,13 +34,9 @@ test.describe("Login page", () => {
 
         await loginPage.login(registeredUser.username, registeredUser.password);
 
-        await expect(homePage.heading).toHaveText(
-            `Hi ${registeredUser.firstName}!`,
-        );
+        await expect(homePage.heading).toHaveText(`Hi ${registeredUser.firstName}!`);
         await expect(homePage.loggedInText).toBeVisible();
-        await expect(homePage.userRow(registeredUser.username)).toContainText(
-            `${registeredUser.firstName} ${registeredUser.lastName}`,
-        );
+        await expect(homePage.userRow(registeredUser.username)).toContainText(`${registeredUser.firstName} ${registeredUser.lastName}`);
     });
 
     test("rejects a wrong password", async ({ registeredUser, loginPage }) => {
@@ -48,9 +44,7 @@ test.describe("Login page", () => {
 
         await loginPage.login(registeredUser.username, "wrong-password");
 
-        await expect(loginPage.errorMessage).toHaveText(
-            "Username or password is incorrect",
-        );
+        await expect(loginPage.errorMessage).toHaveText("Username or password is incorrect");
         await expect(loginPage.heading).toBeVisible();
     });
 
@@ -59,9 +53,7 @@ test.describe("Login page", () => {
 
         await loginPage.login("not_a_registered_user", "irrelevant");
 
-        await expect(loginPage.errorMessage).toHaveText(
-            "Username or password is incorrect",
-        );
+        await expect(loginPage.errorMessage).toHaveText("Username or password is incorrect");
     });
 
     test("logs the user out again", async ({ registeredUser, loginPage, homePage }) => {

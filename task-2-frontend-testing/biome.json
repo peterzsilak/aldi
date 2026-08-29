@@ -1,17 +1,13 @@
 {
     "$schema": "https://biomejs.dev/schemas/2.5.12/schema.json",
     "files": {
-        "includes": [
-            "**",
-            "!node_modules",
-            "!playwright-report",
-            "!test-results"
-        ]
+        "includes": ["**", "!node_modules", "!playwright-report", "!test-results"]
     },
     "formatter": {
         "enabled": true,
         "indentStyle": "space",
-        "indentWidth": 4
+        "indentWidth": 4,
+        "lineWidth": 140
     },
     "linter": {
         "enabled": true,

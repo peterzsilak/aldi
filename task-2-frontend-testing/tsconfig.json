@@ -24,11 +24,5 @@
             "@test-types/*": ["./types/*"]
         }
     },
-    "include": [
-        "playwright.config.ts",
-        "tests/**/*.ts",
-        "page-objects/**/*.ts",
-        "fixture/**/*.ts",
-        "types/**/*.ts"
-    ]
+    "include": ["playwright.config.ts", "tests/**/*.ts", "page-objects/**/*.ts", "fixture/**/*.ts", "types/**/*.ts"]
 }
