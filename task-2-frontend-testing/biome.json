@@ -21,7 +21,18 @@
                 "preset": "none"
             },
             "style": {
-                "preset": "recommended"
+                "preset": "recommended",
+                "noRestrictedImports": {
+                    "level": "error",
+                    "options": {
+                        "patterns": [
+                            {
+                                "group": ["./**", "../**"],
+                                "message": "Use absolute imports (@page-objects/*, @fixture/*) instead of relative paths."
+                            }
+                        ]
+                    }
+                }
             },
             "suspicious": {
                 "preset": "recommended"
