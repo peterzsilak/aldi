@@ -31,7 +31,23 @@ This repository contains the completed technical assignment for the Quality Assu
 │   ├── package.json               # Dependencies and scripts
 │   ├── playwright.config.ts       # Playwright runner configuration
 │   └── tsconfig.json              # TypeScript compiler configuration
-├── task-3-api-testing/            # (currently empty placeholder; task not implemented yet)
+├── task-3-api-testing/
+│   ├── fixture/                   # Worker-scoped mock lifecycle and API request fixtures
+│   ├── mock/                      # In-process mock of the task management REST API
+│   ├── tests/                     # API specs, one per endpoint
+│   │   ├── create-task.spec.ts    # POST /tasks
+│   │   ├── get-task.spec.ts       # GET /tasks/{id}
+│   │   ├── update-task.spec.ts    # PUT /tasks/{id}
+│   │   └── delete-task.spec.ts    # DELETE /tasks/{id}
+│   ├── types/                     # Shared TypeScript types
+│   ├── .nvmrc                     # Project-local Node.js version
+│   ├── .gitignore                 # Ignore rules for the API task
+│   ├── README.md                  # API testing stack, mocked endpoints and setup guide
+│   ├── biome.json                 # Biome formatter and linter config
+│   ├── eslint.config.mjs          # ESLint config for TypeScript and Playwright rules
+│   ├── package.json               # Dependencies and scripts
+│   ├── playwright.config.ts       # Playwright runner configuration
+│   └── tsconfig.json              # TypeScript compiler configuration
 ├── bonus-tasks/                   # (currently empty placeholder; bonus items not implemented yet)
 └── node_modules/                  # Installed project dependencies for task-2
 ```
