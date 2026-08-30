@@ -19,10 +19,11 @@
         "isolatedModules": true,
         "noEmit": true,
         "paths": {
+            "@api/*": ["./api/*"],
             "@mock/*": ["./mock/*"],
             "@fixture/*": ["./fixture/*"],
             "@test-types/*": ["./types/*"]
         }
     },
-    "include": ["playwright.config.ts", "tests/**/*.ts", "mock/**/*.ts", "fixture/**/*.ts", "types/**/*.ts"]
+    "include": ["playwright.config.ts", "tests/**/*.ts", "api/**/*.ts", "mock/**/*.ts", "fixture/**/*.ts", "types/**/*.ts"]
 }
