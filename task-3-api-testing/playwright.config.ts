@@ -2,12 +2,6 @@ import { defineConfig } from "@playwright/test";
 
 const isCI = Boolean(process.env["CI"]);
 
-/**
- * API test configuration. No browsers are needed: every test talks to the
- * in-process mock API started by the `mockTaskApi` worker fixture.
- *
- * See https://playwright.dev/docs/test-configuration.
- */
 export default defineConfig({
     testDir: "./tests",
     /* Run tests in files in parallel */

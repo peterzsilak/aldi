@@ -12,14 +12,6 @@ export type TaskCallResult = ApiCallResult<TaskResponse | TaskErrorResponse | st
 
 const TASKS_PATH = "/tasks";
 
-/**
- * Client of the task management service.
- *
- * The typed methods resolve with the parsed resource and throw a domain error
- * (`TaskValidationError`, `TaskNotFoundError`, ...) on failure. The `*Result`
- * methods return the untouched HTTP result, which keeps negative and
- * protocol-level assertions explicit.
- */
 export class TaskApiClient extends GenericApiClient {
     constructor(request: APIRequestContext, config: GenericApiClientConfig | string) {
         super(request, typeof config === "string" ? createTaskApiClientConfig(config) : config);
