@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Confirm delete</title>
+</head>
+<body>
+<h1>Delete task?</h1>
+<p th:text="${task.title()}">title</p>
+<form th:action="@{/delete/{id}(id=${task.id()})}" method="post">
+    <button type="submit" data-testid="confirm-delete">Confirm</button>
+    <a href="/">Cancel</a>
+</form>
+</body>
+</html>

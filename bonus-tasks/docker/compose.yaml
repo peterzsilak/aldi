@@ -1,0 +1,19 @@
+name: aldi-qa-homework
+
+services:
+  frontend-tests:
+    build:
+      context: ../../task-2-frontend-testing
+      dockerfile: ../bonus-tasks/docker/frontend.Dockerfile
+    environment:
+      CI: "true"
+      HUSKY: "0"
+    volumes:
+      - ../../task-2-frontend-testing/playwright-report:/work/playwright-report
+
+  api-tests:
+    build:
+      context: ../../task-3-api-testing
+      dockerfile: ../bonus-tasks/docker/api.Dockerfile
+    environment:
+      CI: "true"

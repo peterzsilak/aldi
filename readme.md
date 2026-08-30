@@ -23,6 +23,7 @@ This repository contains the completed technical assignment for the Quality Assu
 │   ├── tests/                     # End-to-end Playwright specs
 │   │   └── login.spec.ts          # Login flow coverage (success + failure cases)
 │   ├── types/                     # Shared TypeScript types
+│   ├── .dockerignore              # Build context exclusions for the frontend image
 │   ├── .nvmrc                     # Project-local Node.js version
 │   ├── .gitignore                 # Ignore rules for the frontend task
 │   ├── README.md                  # Frontend testing stack and setup guide
@@ -32,6 +33,8 @@ This repository contains the completed technical assignment for the Quality Assu
 │   ├── playwright.config.ts       # Playwright runner configuration
 │   └── tsconfig.json              # TypeScript compiler configuration
 ├── task-3-api-testing/
+│   ├── .github/workflows/
+│   │   └── api-tests.yml          # GitHub Actions workflow for the API suite
 │   ├── api/                       # Generic API client and the task service client built on it
 │   ├── fixture/                   # Worker-scoped mock lifecycle, API client and assertion helpers
 │   ├── mock/                      # In-process mock of the task management REST API
@@ -41,6 +44,7 @@ This repository contains the completed technical assignment for the Quality Assu
 │   │   ├── update-task.spec.ts    # PUT /tasks/{id}
 │   │   └── delete-task.spec.ts    # DELETE /tasks/{id}
 │   ├── types/                     # Shared TypeScript types
+│   ├── .dockerignore              # Build context exclusions for the API image
 │   ├── .nvmrc                     # Project-local Node.js version
 │   ├── .gitignore                 # Ignore rules for the API task
 │   ├── README.md                  # API testing stack, mocked endpoints and setup guide
@@ -49,6 +53,30 @@ This repository contains the completed technical assignment for the Quality Assu
 │   ├── package.json               # Dependencies and scripts
 │   ├── playwright.config.ts       # Playwright runner configuration
 │   └── tsconfig.json              # TypeScript compiler configuration
-├── bonus-tasks/                   # (currently empty placeholder; bonus items not implemented yet)
-└── node_modules/                  # Installed project dependencies for task-2
+└── bonus-tasks/
+    ├── README.md                  # Index of bonus answers
+    ├── docker/                    # Docker explanation + Playwright test environment
+    │   ├── README.md              # What Docker is, QA benefits, how to run
+    │   ├── compose.yaml           # frontend-tests + api-tests services
+    │   ├── frontend.Dockerfile    # Official Playwright image for Task 2
+    │   └── api.Dockerfile         # Node 26 image for Task 3
+    ├── ci/
+    │   └── README.md              # GitHub Actions process; links Task 2/3 workflows
+    └── junit-selenium/            # JUnit + Selenium Delete Task (mock + Feign)
+        ├── README.md              # Approach and how to run the Maven sample
+        └── sample/
+            ├── pom.xml            # Spring Boot 3 / Java 21 Maven project
+            └── src/
+                ├── main/          # In-memory mock API + Thymeleaf Delete Task UI
+                │   ├── java/qa/homework/tasks/
+                │   │   ├── TaskApplication.java
+                │   │   ├── api/   # REST contract matching Task 3
+                │   │   ├── domain/# In-memory TaskStore
+                │   │   └── web/   # Server-rendered list and confirm-delete
+                │   └── resources/templates/
+                └── test/
+                    ├── java/qa/homework/tasks/
+                    │   ├── client/TaskApiClient.java   # Spring Feign client
+                    │   └── ui/    # Page object + JUnit Selenium tests
+                    └── resources/application-test.yml
 ```

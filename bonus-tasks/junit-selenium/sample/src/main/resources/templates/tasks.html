@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Tasks</title>
+</head>
+<body>
+<h1>Tasks</h1>
+<ul data-testid="task-list">
+    <li th:each="task : ${tasks}" th:attr="data-testid=|task-row-${task.id()}|">
+        <span th:text="${task.title()}">title</span>
+        <a th:href="@{/confirm-delete/{id}(id=${task.id()})}"
+           th:attr="data-testid=|delete-task-${task.id()}|">Delete</a>
+    </li>
+</ul>
+<p th:if="${tasks.empty}" data-testid="empty-list">No tasks</p>
+</body>
+</html>
