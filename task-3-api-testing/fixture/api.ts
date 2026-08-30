@@ -1,21 +1,19 @@
-import { startMockTaskApi, type MockTaskApi } from "@mock/task-api-server";
-import { expect, request, test as base, type APIRequestContext, type APIResponse } from "@playwright/test";
+import { type MockTaskApi, startMockTaskApi } from "@mock/task-api-server";
+import { type APIRequestContext, type APIResponse, test as base, expect, request } from "@playwright/test";
 import type { CreateTaskPayload, Task } from "@test-types/task";
 
 export interface ApiWorkerFixtures {
-    /** The mock task API, started once per worker. */
     mockTaskApi: MockTaskApi;
 }
 
 export interface ApiFixtures {
-    /** Request context bound to the mock API, with an empty store for every test. */
     taskApi: APIRequestContext;
-    /** Creates a task through the API and asserts that it was accepted. */
     createTask: (overrides?: CreateTaskPayload) => Promise<Task>;
 }
 
 export const test = base.extend<ApiFixtures, ApiWorkerFixtures>({
     mockTaskApi: [
+        // biome-ignore lint/correctness/noEmptyPattern: Playwright requires a destructuring pattern here.
         async ({}, use) => {
             const mock = await startMockTaskApi();
 
