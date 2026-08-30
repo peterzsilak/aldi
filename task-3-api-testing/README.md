@@ -19,8 +19,12 @@ in-process**, so the suite is fully deterministic and needs no external environm
 
 ```text
 task-3-api-testing/
+├── api/
+│   ├── generic-api-client/  # Reusable client: request builder, retries, logging, typed errors
+│   └── task-api-client/     # Task service client extending the generic one
 ├── fixture/
-│   └── api.ts               # Worker fixture starting the mock, per-test request context + helpers
+│   ├── api.ts               # Worker fixture starting the mock, client + helpers per test
+│   └── expect-api-error.ts  # Assertion helper for typed client errors
 ├── mock/
 │   ├── task-api-server.ts   # HTTP layer: routing, status codes, error bodies
 │   └── task-store.ts        # In-memory store and payload validation
@@ -33,9 +37,33 @@ task-3-api-testing/
     └── task.ts              # Shared Task/API types
 ```
 
-The mock lives entirely outside the specs. Tests only ask for the `taskApi` fixture, which starts
-the mock once per worker, resets its store before every test and hands over an `APIRequestContext`
-bound to the mock's base URL.
+The mock lives entirely outside the specs. Tests only ask for the `taskApiClient` fixture, which
+starts the mock once per worker, resets its store before every test and hands over a client bound
+to the mock's base URL.
+
+## API client layer
+
+`GenericApiClient` wraps Playwright's `APIRequestContext` and owns the cross-cutting concerns of an
+HTTP call, so the specs stay free of transport details:
+
+- **Request building** – base URL resolution, query parameters, default JSON headers, timeouts.
+- **Logging** – every request, response and retry is logged. Silent by default; raise it with
+  `API_LOG_LEVEL=debug npm test` (`error`, `warn`, `info`, `debug`).
+- **Retries** – retryable statuses (`408`, `429`, `5xx`) are retried with exponential backoff.
+- **Typed errors** – failed responses are mapped onto an error hierarchy (`ApiError` →
+  `ClientError`/`ServerError` → `NotFoundError`, `BadRequestError`, ...) carrying the full
+  request/response context.
+
+`TaskApiClient` extends it with the domain methods and promotes `400`/`404` to `TaskValidationError`
+and `TaskNotFoundError`:
+
+```ts
+const task = await taskApiClient.createTask({ title: "Buy milk" });
+const error = await expectApiError(taskApiClient.getTask(unknownId), TaskNotFoundError);
+```
+
+Every method has a `*Result` counterpart (`createTaskResult`, `getTaskResult`, ...) that returns the
+raw `ApiCallResult` without throwing, which keeps status-, header- and raw-body assertions explicit.
 
 ## Mocked endpoints
 

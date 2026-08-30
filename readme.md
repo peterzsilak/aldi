@@ -32,7 +32,8 @@ This repository contains the completed technical assignment for the Quality Assu
 │   ├── playwright.config.ts       # Playwright runner configuration
 │   └── tsconfig.json              # TypeScript compiler configuration
 ├── task-3-api-testing/
-│   ├── fixture/                   # Worker-scoped mock lifecycle and API request fixtures
+│   ├── api/                       # Generic API client and the task service client built on it
+│   ├── fixture/                   # Worker-scoped mock lifecycle, API client and assertion helpers
 │   ├── mock/                      # In-process mock of the task management REST API
 │   ├── tests/                     # API specs, one per endpoint
 │   │   ├── create-task.spec.ts    # POST /tasks
