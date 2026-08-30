@@ -1,17 +1,24 @@
+import { TaskNotFoundError } from "@api/task-api-client/errors/task-not-found-error";
+import { TaskValidationError } from "@api/task-api-client/errors/task-validation-error";
 import { expect, test } from "@fixture/api";
+import { expectApiError } from "@fixture/expect-api-error";
 import type { ApiErrorBody, Task } from "@test-types/task";
 
+const UNKNOWN_ID = "00000000-0000-0000-0000-000000000000";
+
 test.describe("PUT /tasks/{id}", () => {
-    test("returns 200 and replaces the mutable fields", async ({ taskApi, createTask }) => {
+    test("returns 200 and replaces the mutable fields", async ({ taskApiClient, createTask }) => {
         const created = await createTask({ title: "Draft release notes", status: "todo" });
 
-        const response = await taskApi.put(`/tasks/${created.id}`, {
-            data: { title: "Publish release notes", description: "Include the changelog", status: "done" },
+        const result = await taskApiClient.updateTaskResult(created.id, {
+            title: "Publish release notes",
+            description: "Include the changelog",
+            status: "done",
         });
 
-        expect(response.status()).toBe(200);
+        expect(result.status).toBe(200);
 
-        const updated = (await response.json()) as Task;
+        const updated = result.body as Task;
 
         expect(updated.id).toBe(created.id);
         expect(updated.createdAt).toBe(created.createdAt);
@@ -21,56 +28,47 @@ test.describe("PUT /tasks/{id}", () => {
         expect(new Date(updated.updatedAt).getTime()).toBeGreaterThan(new Date(created.updatedAt).getTime());
     });
 
-    test("persists the update", async ({ taskApi, createTask }) => {
+    test("persists the update", async ({ taskApiClient, createTask }) => {
         const created = await createTask();
 
-        const updated = await (await taskApi.put(`/tasks/${created.id}`, { data: { title: "Updated title" } })).json();
+        const updated = await taskApiClient.updateTask(created.id, { title: "Updated title" });
 
-        const response = await taskApi.get(`/tasks/${created.id}`);
-
-        expect(response.status()).toBe(200);
-        expect(await response.json()).toEqual(updated);
+        await expect(taskApiClient.getTask(created.id)).resolves.toEqual(updated);
     });
 
-    test("replaces the whole resource, resetting omitted fields to their defaults", async ({ taskApi, createTask }) => {
+    test("replaces the whole resource, resetting omitted fields to their defaults", async ({ taskApiClient, createTask }) => {
         const created = await createTask({ title: "Full replace", description: "Original", status: "in_progress" });
 
-        const response = await taskApi.put(`/tasks/${created.id}`, { data: { title: "Only the title" } });
-
-        expect(response.status()).toBe(200);
-
-        const updated = (await response.json()) as Task;
+        const updated = await taskApiClient.updateTask(created.id, { title: "Only the title" });
 
         expect(updated.description).toBe("");
         expect(updated.status).toBe("todo");
     });
 
-    test("rejects a missing title with 400", async ({ taskApi, createTask }) => {
+    test("raises a validation error and keeps the task untouched when the title is missing", async ({ taskApiClient, createTask }) => {
         const created = await createTask({ title: "Keep me" });
 
-        const response = await taskApi.put(`/tasks/${created.id}`, { data: { description: "no title" } });
+        const error = await expectApiError(taskApiClient.updateTask(created.id, { description: "no title" } as never), TaskValidationError);
 
-        expect(response.status()).toBe(400);
-        expect(((await response.json()) as ApiErrorBody).details).toContain("title is required and must be a non-empty string");
+        expect(error.status).toBe(400);
+        expect(error.details).toContain("title is required and must be a non-empty string");
 
-        const unchanged = (await (await taskApi.get(`/tasks/${created.id}`)).json()) as Task;
-
-        expect(unchanged).toEqual(created);
+        await expect(taskApiClient.getTask(created.id)).resolves.toEqual(created);
     });
 
-    test("rejects an unknown status with 400", async ({ taskApi, createTask }) => {
+    test("rejects an unknown status with 400", async ({ taskApiClient, createTask }) => {
         const created = await createTask();
 
-        const response = await taskApi.put(`/tasks/${created.id}`, { data: { title: "Valid", status: "cancelled" } });
+        const result = await taskApiClient.updateTaskResult(created.id, { title: "Valid", status: "cancelled" });
 
-        expect(response.status()).toBe(400);
-        expect(((await response.json()) as ApiErrorBody).details).toContain("status must be one of: todo, in_progress, done");
+        expect(result.status).toBe(400);
+        expect((result.body as ApiErrorBody).details).toContain("status must be one of: todo, in_progress, done");
     });
 
-    test("returns 404 for an unknown id", async ({ taskApi }) => {
-        const response = await taskApi.put("/tasks/00000000-0000-0000-0000-000000000000", { data: { title: "Ghost" } });
+    test("raises a not found error for an unknown id", async ({ taskApiClient }) => {
+        const error = await expectApiError(taskApiClient.updateTask(UNKNOWN_ID, { title: "Ghost" }), TaskNotFoundError);
 
-        expect(response.status()).toBe(404);
-        expect(((await response.json()) as ApiErrorBody).error).toBe("Not Found");
+        expect(error.status).toBe(404);
+        expect((error.body as ApiErrorBody).error).toBe("Not Found");
     });
 });
