@@ -1,12 +1,11 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import type { AddressInfo } from "node:net";
-import { TaskStore, validateTaskPayload, type NormalisedTaskPayload } from "@mock/task-store";
+import { type NormalisedTaskPayload, TaskStore, validateTaskPayload } from "@mock/task-store";
 import type { ApiErrorBody, Task } from "@test-types/task";
 
 export interface MockTaskApi {
     /** Base URL of the running mock, e.g. `http://127.0.0.1:53124`. */
     baseURL: string;
-    /** Data store behind the mock, exposed so fixtures can seed or reset it. */
     store: TaskStore;
     close: () => Promise<void>;
 }
