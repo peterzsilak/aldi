@@ -1,0 +1,28 @@
+{
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "preserve",
+        "moduleResolution": "bundler",
+        "types": ["node", "@playwright/test"],
+        "strict": true,
+        "noImplicitOverride": true,
+        "noUncheckedIndexedAccess": true,
+        "exactOptionalPropertyTypes": true,
+        "noPropertyAccessFromIndexSignature": true,
+        "forceConsistentCasingInFileNames": true,
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitReturns": true,
+        "allowJs": false,
+        "skipLibCheck": true,
+        "resolveJsonModule": true,
+        "esModuleInterop": true,
+        "isolatedModules": true,
+        "noEmit": true,
+        "paths": {
+            "@mock/*": ["./mock/*"],
+            "@fixture/*": ["./fixture/*"],
+            "@test-types/*": ["./types/*"]
+        }
+    },
+    "include": ["playwright.config.ts", "tests/**/*.ts", "mock/**/*.ts", "fixture/**/*.ts", "types/**/*.ts"]
+}

@@ -1,0 +1,54 @@
+{
+    "$schema": "https://biomejs.dev/schemas/2.5.12/schema.json",
+    "files": {
+        "includes": ["**", "!node_modules", "!playwright-report", "!test-results"]
+    },
+    "formatter": {
+        "enabled": true,
+        "indentStyle": "space",
+        "indentWidth": 4,
+        "lineWidth": 140
+    },
+    "linter": {
+        "enabled": true,
+        "rules": {
+            "preset": "none",
+            "nursery": {
+                "preset": "none"
+            },
+            "style": {
+                "preset": "recommended",
+                "noRestrictedImports": {
+                    "level": "error",
+                    "options": {
+                        "patterns": [
+                            {
+                                "group": ["./**", "../**"],
+                                "message": "Use absolute imports (@mock/*, @fixture/*, @test-types/*) instead of relative paths."
+                            }
+                        ]
+                    }
+                }
+            },
+            "suspicious": {
+                "preset": "recommended"
+            },
+            "correctness": {
+                "preset": "recommended"
+            },
+            "performance": {
+                "preset": "recommended"
+            },
+            "security": {
+                "preset": "recommended"
+            },
+            "complexity": {
+                "preset": "recommended",
+                "useLiteralKeys": "off"
+            },
+            "a11y": {
+                "preset": "recommended"
+            }
+        }
+    }
+}
