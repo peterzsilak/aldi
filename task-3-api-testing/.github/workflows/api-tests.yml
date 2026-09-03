@@ -6,6 +6,18 @@ on:
   pull_request:
     branches: [ main, master ]
   workflow_dispatch:
+    inputs:
+      project:
+        description: Browser project to run
+        required: false
+        type: choice
+        default: all
+        options: [all, chromium, firefox, webkit]
+      tests_per_shard:
+        description: Maximum tests per shard
+        required: false
+        type: string
+        default: '10'
 
 jobs:
   install-dependencies:
@@ -42,8 +54,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: run-quality-checks
     outputs:
-      test_count: ${{ steps.compute.outputs.test_count }}
-      shards: ${{ steps.compute.outputs.shards }}
+      matrix: ${{ steps.compute.outputs.matrix }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -55,31 +66,52 @@ jobs:
         run: npm ci
       - name: Compute shard matrix
         id: compute
+        shell: bash
         env:
+          SELECTED_PROJECT: ${{ github.event_name == 'workflow_dispatch' && inputs.project || 'all' }}
+          TESTS_PER_SHARD: ${{ github.event_name == 'workflow_dispatch' && inputs.tests_per_shard || '10' }}
           PLAYWRIGHT_TEST_ARGS: ${{ vars.PLAYWRIGHT_TEST_ARGS }}
         run: |
-          TEST_COUNT="$(npx playwright test --list ${PLAYWRIGHT_TEST_ARGS:-} | grep -E -c ':[0-9]+:[0-9]+' || true)"
-          TEST_COUNT="$(echo "$TEST_COUNT" | tr -d '[:space:]')"
+          set -euo pipefail
 
-          if [ "$TEST_COUNT" -gt 0 ]; then
-            SHARDS="$(seq 1 "$TEST_COUNT" | jq -R . | jq -s -c .)"
-          else
-            SHARDS='[]'
+          projects=(chromium firefox webkit)
+          if [ "$SELECTED_PROJECT" != "all" ]; then
+            projects=("$SELECTED_PROJECT")
           fi
 
-          echo "test_count=$TEST_COUNT" >> "$GITHUB_OUTPUT"
-          echo "shards=$SHARDS" >> "$GITHUB_OUTPUT"
+          json='['
+          for project in "${projects[@]}"; do
+            count=$(npx playwright test --list --project="$project" ${PLAYWRIGHT_TEST_ARGS:-} 2>/dev/null | grep -E -c ':[0-9]+:[0-9]+' || true)
+            count=$(echo "$count" | tr -d '[:space:]')
+            [ -n "$count" ] || count=0
+
+            if [ "$count" -gt 0 ]; then
+              shards=$(( (count + TESTS_PER_SHARD - 1) / TESTS_PER_SHARD ))
+            else
+              shards=0
+            fi
+
+            for shard in $(seq 1 "$shards"); do
+              if [ "$json" != "[" ]; then
+                json="$json," 
+              fi
+              json="${json}{\"project\":\"$project\",\"shard\":\"$shard\",\"total_shards\":\"$shards\"}"
+            done
+          done
+          json="$json]"
+
+          echo "matrix=$json" >> "$GITHUB_OUTPUT"
 
   execute-tests:
     timeout-minutes: 45
     runs-on: ubuntu-latest
     needs: discover-shards
-    if: ${{ needs.discover-shards.outputs.test_count != '0' }}
+    if: ${{ needs.discover-shards.outputs.matrix != '[]' && needs.discover-shards.outputs.matrix != '' }}
     strategy:
       fail-fast: false
-      max-parallel: ${{ fromJSON(needs.discover-shards.outputs.test_count) }}
+      max-parallel: 6
       matrix:
-        shard: ${{ fromJSON(needs.discover-shards.outputs.shards) }}
+        include: ${{ fromJSON(needs.discover-shards.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -92,10 +124,10 @@ jobs:
       - name: Run API tests
         env:
           PLAYWRIGHT_TEST_ARGS: ${{ vars.PLAYWRIGHT_TEST_ARGS }}
-        run: npx playwright test --shard=${{ matrix.shard }}/${{ needs.discover-shards.outputs.test_count }} ${PLAYWRIGHT_TEST_ARGS:-}
+        run: npx playwright test --project="${{ matrix.project }}" --shard=${{ matrix.shard }}/${{ matrix.total_shards }} ${PLAYWRIGHT_TEST_ARGS:-}
       - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
-          name: playwright-report-${{ matrix.shard }}
+          name: playwright-report-${{ matrix.project }}-${{ matrix.shard }}
           path: playwright-report/
           retention-days: 30
