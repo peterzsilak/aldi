@@ -8,9 +8,26 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
-    timeout-minutes: 15
+  install-dependencies:
+    timeout-minutes: 30
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: task-3-api-testing
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: task-3-api-testing/.nvmrc
+          cache: npm
+          cache-dependency-path: task-3-api-testing/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+
+  run-quality-checks:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    needs: install-dependencies
     defaults:
       run:
         working-directory: task-3-api-testing
@@ -25,11 +42,72 @@ jobs:
         run: npm ci
       - name: Typecheck and lint
         run: npm run check
+
+  discover-shards:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    needs: run-quality-checks
+    defaults:
+      run:
+        working-directory: task-3-api-testing
+    outputs:
+      test_count: ${{ steps.compute.outputs.test_count }}
+      shards: ${{ steps.compute.outputs.shards }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: task-3-api-testing/.nvmrc
+          cache: npm
+          cache-dependency-path: task-3-api-testing/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Compute shard matrix
+        id: compute
+        env:
+          PLAYWRIGHT_TEST_ARGS: ${{ vars.PLAYWRIGHT_TEST_ARGS }}
+        run: |
+          TEST_COUNT="$(npx playwright test --list ${PLAYWRIGHT_TEST_ARGS:-} | grep -E -c ':[0-9]+:[0-9]+' || true)"
+          TEST_COUNT="$(echo "$TEST_COUNT" | tr -d '[:space:]')"
+
+          if [ "$TEST_COUNT" -gt 0 ]; then
+            SHARDS="$(seq 1 "$TEST_COUNT" | jq -R . | jq -s -c .)"
+          else
+            SHARDS='[]'
+          fi
+
+          echo "test_count=$TEST_COUNT" >> "$GITHUB_OUTPUT"
+          echo "shards=$SHARDS" >> "$GITHUB_OUTPUT"
+
+  execute-tests:
+    timeout-minutes: 45
+    runs-on: ubuntu-latest
+    needs: discover-shards
+    if: ${{ needs.discover-shards.outputs.test_count != '0' }}
+    defaults:
+      run:
+        working-directory: task-3-api-testing
+    strategy:
+      fail-fast: false
+      max-parallel: ${{ fromJSON(needs.discover-shards.outputs.test_count) }}
+      matrix:
+        shard: ${{ fromJSON(needs.discover-shards.outputs.shards) }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: task-3-api-testing/.nvmrc
+          cache: npm
+          cache-dependency-path: task-3-api-testing/package-lock.json
+      - name: Install dependencies
+        run: npm ci
       - name: Run API tests
-        run: npm run test:raw
+        env:
+          PLAYWRIGHT_TEST_ARGS: ${{ vars.PLAYWRIGHT_TEST_ARGS }}
+        run: npx playwright test --shard=${{ matrix.shard }}/${{ needs.discover-shards.outputs.test_count }} ${PLAYWRIGHT_TEST_ARGS:-}
       - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.shard }}
           path: task-3-api-testing/playwright-report/
           retention-days: 30
