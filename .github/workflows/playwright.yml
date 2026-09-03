@@ -83,13 +83,18 @@ jobs:
         run: |
           set -euo pipefail
 
-          projects=(chromium firefox webkit)
+          discovered_projects=$(npx playwright test --list ${PLAYWRIGHT_TEST_ARGS:-} 2>/dev/null | sed -nE 's/^\s*\[([^]]+)\].*/\1/p' | sort -u)
+          if [ -z "$discovered_projects" ]; then
+            echo "matrix=[]" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
           if [ "$SELECTED_PROJECT" != "all" ]; then
-            projects=("$SELECTED_PROJECT")
+            discovered_projects="$SELECTED_PROJECT"
           fi
 
           json='['
-          for project in "${projects[@]}"; do
+          for project in $discovered_projects; do
             count=$(npx playwright test --list --project="$project" ${PLAYWRIGHT_TEST_ARGS:-} 2>/dev/null | grep -E -c ':[0-9]+:[0-9]+' || true)
             count=$(echo "$count" | tr -d '[:space:]')
             [ -n "$count" ] || count=0
@@ -102,7 +107,7 @@ jobs:
 
             for shard in $(seq 1 "$shards"); do
               if [ "$json" != "[" ]; then
-                json="$json," 
+                json="$json,"
               fi
               json="${json}{\"project\":\"$project\",\"shard\":\"$shard\",\"total_shards\":\"$shards\"}"
             done
