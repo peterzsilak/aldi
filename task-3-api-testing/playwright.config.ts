@@ -12,8 +12,8 @@ export default defineConfig({
     retries: isCI ? 2 : 0,
     /* Reporter to use. See https://playwright.dev/docs/test-reporters */
     reporter: "html",
-    /* Opt out of parallel tests on CI. */
-    ...(isCI ? { workers: 1 } : {}),
+    /* Keep CI output verbose enough to show per-test progress while still using sharding. */
+    ...(isCI ? { workers: 6 } : {}),
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     use: {
         trace: "on-first-retry",

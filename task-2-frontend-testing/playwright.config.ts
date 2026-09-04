@@ -23,8 +23,8 @@ export default defineConfig({
     retries: isCI ? 2 : 0,
     /* Reporter to use. See https://playwright.dev/docs/test-reporters */
     reporter: "html",
-    /* Opt out of parallel tests on CI. */
-    ...(isCI ? { workers: 1 } : {}),
+    /* Keep CI output verbose enough to show per-test progress while still using sharding. */
+    ...(isCI ? { workers: 6 } : {}),
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
     use: {
         /* Base URL to use in actions like `await page.goto('')`. */
